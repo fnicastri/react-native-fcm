@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.facebook.react.ReactApplication;
@@ -18,9 +18,9 @@ public class InstanceIdService extends FirebaseInstanceIdService {
     private static final String TAG = "InstanceIdService";
 
     /**
-     * Called if InstanceID token is updated. This may occur if the security of
-     * the previous token had been compromised. This call is initiated by the
-     * InstanceID provider.
+     * Called if InstanceID token is updated. This may occur if the security of the
+     * previous token had been compromised. This call is initiated by the InstanceID
+     * provider.
      */
     // [START refresh_token]
     @Override
@@ -41,18 +41,20 @@ public class InstanceIdService extends FirebaseInstanceIdService {
         handler.post(new Runnable() {
             public void run() {
                 // Construct and load our normal React JS code bundle
-                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost().getReactInstanceManager();
+                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost()
+                        .getReactInstanceManager();
                 ReactContext context = mReactInstanceManager.getCurrentReactContext();
                 // If it's constructed, send a notification
                 if (context != null) {
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(message);
                 } else {
                     // Otherwise wait for construction, then send the notification
-                    mReactInstanceManager.addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
-                        public void onReactContextInitialized(ReactContext context) {
-                            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(message);
-                        }
-                    });
+                    mReactInstanceManager
+                            .addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
+                                public void onReactContextInitialized(ReactContext context) {
+                                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(message);
+                                }
+                            });
                     if (!mReactInstanceManager.hasStartedCreatingInitialContext()) {
                         // Construct it in the background
                         mReactInstanceManager.createReactContextInBackground();

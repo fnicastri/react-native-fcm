@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.facebook.react.ReactApplication;
@@ -30,26 +30,30 @@ public class MessagingService extends FirebaseMessagingService {
         buildLocalNotification(remoteMessage);
 
         final Intent message = i;
-        
-        // We need to run this on the main thread, as the React code assumes that is true.
-        // Namely, DevServerHelper constructs a Handler() without a Looper, which triggers:
+
+        // We need to run this on the main thread, as the React code assumes that is
+        // true.
+        // Namely, DevServerHelper constructs a Handler() without a Looper, which
+        // triggers:
         // "Can't create handler inside thread that has not called Looper.prepare()"
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
                 // Construct and load our normal React JS code bundle
-                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost().getReactInstanceManager();
+                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost()
+                        .getReactInstanceManager();
                 ReactContext context = mReactInstanceManager.getCurrentReactContext();
                 // If it's constructed, send a notification
                 if (context != null) {
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(message);
                 } else {
                     // Otherwise wait for construction, then send the notification
-                    mReactInstanceManager.addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
-                        public void onReactContextInitialized(ReactContext context) {
-                            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(message);
-                        }
-                    });
+                    mReactInstanceManager
+                            .addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
+                                public void onReactContextInitialized(ReactContext context) {
+                                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(message);
+                                }
+                            });
                     if (!mReactInstanceManager.hasStartedCreatingInitialContext()) {
                         // Construct it in the background
                         mReactInstanceManager.createReactContextInBackground();
@@ -71,7 +75,7 @@ public class MessagingService extends FirebaseMessagingService {
         }
 
         try {
-            int badgeCount = Integer.parseInt((String)data.get("badge"));
+            int badgeCount = Integer.parseInt((String) data.get("badge"));
             badgeHelper.setBadgeCount(badgeCount);
         } catch (Exception e) {
             Log.e(TAG, "Badge count needs to be an integer", e);
@@ -79,12 +83,12 @@ public class MessagingService extends FirebaseMessagingService {
     }
 
     public void buildLocalNotification(RemoteMessage remoteMessage) {
-        if(remoteMessage.getData() == null){
+        if (remoteMessage.getData() == null) {
             return;
         }
         Map<String, String> data = remoteMessage.getData();
         String customNotification = data.get("custom_notification");
-        if(customNotification != null){
+        if (customNotification != null) {
             try {
                 Bundle bundle = BundleJSONConverter.convertToBundle(new JSONObject(customNotification));
                 FIRLocalMessagingHelper helper = new FIRLocalMessagingHelper(this.getApplication());

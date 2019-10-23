@@ -27,8 +27,10 @@ import com.google.firebase.messaging.RemoteMessage.Notification;
 import android.app.Application;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.LocalBroadcastManager;
+// import android.support.v4.app.NotificationManagerCompat;
+import androidx.core.app.NotificationManagerCompat;
+// import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
 import android.content.Context;
@@ -41,7 +43,8 @@ import com.google.firebase.FirebaseApp;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 
-public class FIRMessagingModule extends ReactContextBaseJavaModule implements LifecycleEventListener, ActivityEventListener {
+public class FIRMessagingModule extends ReactContextBaseJavaModule
+        implements LifecycleEventListener, ActivityEventListener {
     private final static String TAG = FIRMessagingModule.class.getCanonicalName();
     private FIRLocalMessagingHelper mFIRLocalMessagingHelper;
     private BadgeHelper mBadgeHelper;
@@ -63,9 +66,9 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
     }
 
     @ReactMethod
-    public void getInitialNotification(Promise promise){
+    public void getInitialNotification(Promise promise) {
         Activity activity = getCurrentActivity();
-        if(activity == null){
+        if (activity == null) {
             promise.resolve(null);
             return;
         }
@@ -73,8 +76,8 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
     }
 
     @ReactMethod
-    public void requestPermissions(Promise promise){
-        if(NotificationManagerCompat.from(getReactApplicationContext()).areNotificationsEnabled()){
+    public void requestPermissions(Promise promise) {
+        if (NotificationManagerCompat.from(getReactApplicationContext()).areNotificationsEnabled()) {
             promise.resolve(true);
         } else {
             promise.reject(null, "Notification disabled");
@@ -82,40 +85,38 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
     }
 
     @ReactMethod
-    public void createNotificationChannel(ReadableMap details, Promise promise){
+    public void createNotificationChannel(ReadableMap details, Promise promise) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager mngr = (NotificationManager) getReactApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+            NotificationManager mngr = (NotificationManager) getReactApplicationContext()
+                    .getSystemService(NOTIFICATION_SERVICE);
             String id = details.getString("id");
             String name = details.getString("name");
             String priority = details.getString("priority");
             int importance;
-            switch(priority) {
-                case "min":
-                    importance = NotificationManager.IMPORTANCE_MIN;
-                    break;
-                case "low":
-                    importance = NotificationManager.IMPORTANCE_LOW;
-                    break;
-                case "high":
-                    importance = NotificationManager.IMPORTANCE_HIGH;
-                    break;
-                case "max":
-                    importance = NotificationManager.IMPORTANCE_MAX;
-                    break;
-                default:
-                    importance = NotificationManager.IMPORTANCE_DEFAULT;
+            switch (priority) {
+            case "min":
+                importance = NotificationManager.IMPORTANCE_MIN;
+                break;
+            case "low":
+                importance = NotificationManager.IMPORTANCE_LOW;
+                break;
+            case "high":
+                importance = NotificationManager.IMPORTANCE_HIGH;
+                break;
+            case "max":
+                importance = NotificationManager.IMPORTANCE_MAX;
+                break;
+            default:
+                importance = NotificationManager.IMPORTANCE_DEFAULT;
             }
             if (mngr.getNotificationChannel(id) != null) {
                 promise.resolve(null);
                 return;
             }
             //
-            NotificationChannel channel = new NotificationChannel(
-                    id,
-                    name,
-                    importance);
+            NotificationChannel channel = new NotificationChannel(id, name, importance);
             // Configure the notification channel.
-            if(details.hasKey("description")){
+            if (details.hasKey("description")) {
                 channel.setDescription(details.getString("description"));
             }
             mngr.createNotificationChannel(channel);
@@ -125,11 +126,12 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
 
     @ReactMethod
     public void deleteNotificationChannel(String id, Promise promise) {
-	    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-		    NotificationManager mngr = (NotificationManager) getReactApplicationContext().getSystemService(NOTIFICATION_SERVICE);
-		    mngr.deleteNotificationChannel(id);
-	    }
-	    promise.resolve(null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager mngr = (NotificationManager) getReactApplicationContext()
+                    .getSystemService(NOTIFICATION_SERVICE);
+            mngr.deleteNotificationChannel(id);
+        }
+        promise.resolve(null);
     }
 
     @ReactMethod
@@ -139,7 +141,7 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
             promise.resolve(FirebaseInstanceId.getInstance().getToken());
         } catch (Throwable e) {
             e.printStackTrace();
-            promise.reject(null,e.getMessage());
+            promise.reject(null, e.getMessage());
         }
     }
 
@@ -152,7 +154,7 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
             promise.resolve(token);
         } catch (Throwable e) {
             e.printStackTrace();
-            promise.reject(null,e.getMessage());
+            promise.reject(null, e.getMessage());
         }
     }
 
@@ -164,18 +166,18 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
             promise.resolve(null);
         } catch (Throwable e) {
             e.printStackTrace();
-            promise.reject(null,e.getMessage());
+            promise.reject(null, e.getMessage());
         }
     }
 
     @ReactMethod
-    public void deleteInstanceId(Promise promise){
+    public void deleteInstanceId(Promise promise) {
         try {
             FirebaseInstanceId.getInstance().deleteInstanceId();
             promise.resolve(null);
         } catch (Exception e) {
             e.printStackTrace();
-            promise.reject(null,e.getMessage());
+            promise.reject(null, e.getMessage());
         }
     }
 
@@ -195,6 +197,7 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
     public void cancelLocalNotification(String notificationID) {
         mFIRLocalMessagingHelper.cancelLocalNotification(notificationID);
     }
+
     @ReactMethod
     public void cancelAllLocalNotifications() {
         mFIRLocalMessagingHelper.cancelAllLocalNotifications();
@@ -206,37 +209,37 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
     }
 
     @ReactMethod
-    public void removeAllDeliveredNotifications(){
+    public void removeAllDeliveredNotifications() {
         mFIRLocalMessagingHelper.removeAllDeliveredNotifications();
     }
 
     @ReactMethod
-    public void subscribeToTopic(String topic, Promise promise){
-	    try {
+    public void subscribeToTopic(String topic, Promise promise) {
+        try {
             FirebaseMessaging.getInstance().subscribeToTopic(topic);
             promise.resolve(null);
         } catch (Exception e) {
             e.printStackTrace();
-            promise.reject(null,e.getMessage());
+            promise.reject(null, e.getMessage());
         }
     }
 
     @ReactMethod
-    public void unsubscribeFromTopic(String topic, Promise promise){
-	    try {
+    public void unsubscribeFromTopic(String topic, Promise promise) {
+        try {
             FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
             promise.resolve(null);
         } catch (Exception e) {
             e.printStackTrace();
-            promise.reject(null,e.getMessage());
+            promise.reject(null, e.getMessage());
         }
     }
 
     @ReactMethod
-    public void getScheduledLocalNotifications(Promise promise){
+    public void getScheduledLocalNotifications(Promise promise) {
         ArrayList<Bundle> bundles = mFIRLocalMessagingHelper.getScheduledLocalNotifications();
         WritableArray array = Arguments.createArray();
-        for(Bundle bundle:bundles){
+        for (Bundle bundle : bundles) {
             array.pushMap(Arguments.fromBundle(bundle));
         }
         promise.resolve(array);
@@ -253,9 +256,8 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
     }
 
     private void sendEvent(String eventName, Object params) {
-        getReactApplicationContext()
-        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-        .emit(eventName, params);
+        getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName,
+                params);
     }
 
     private void registerTokenRefreshHandler() {
@@ -275,7 +277,7 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
     public void send(String senderId, ReadableMap payload) throws Exception {
         FirebaseMessaging fm = FirebaseMessaging.getInstance();
         RemoteMessage.Builder message = new RemoteMessage.Builder(senderId + "@gcm.googleapis.com")
-        .setMessageId(UUID.randomUUID().toString());
+                .setMessageId(UUID.randomUUID().toString());
 
         ReadableMapKeySetIterator iterator = payload.keySetIterator();
         while (iterator.hasNextKey()) {
@@ -288,18 +290,18 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
 
     private String getStringFromReadableMap(ReadableMap map, String key) throws Exception {
         switch (map.getType(key)) {
-            case String:
-                return map.getString(key);
-            case Number:
-                try {
-                    return String.valueOf(map.getInt(key));
-                } catch (Exception e) {
-                    return String.valueOf(map.getDouble(key));
-                }
-            case Boolean:
-                return String.valueOf(map.getBoolean(key));
-            default:
-                throw new Exception("Unknown data type: " + map.getType(key).name() + " for message key " + key );
+        case String:
+            return map.getString(key);
+        case Number:
+            try {
+                return String.valueOf(map.getInt(key));
+            } catch (Exception e) {
+                return String.valueOf(map.getDouble(key));
+            }
+        case Boolean:
+            return String.valueOf(map.getBoolean(key));
+        default:
+            throw new Exception("Unknown data type: " + map.getType(key).name() + " for message key " + key);
         }
     }
 
@@ -329,10 +331,10 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
                     params.putString("google.message_id", message.getMessageId());
                     params.putDouble("google.sent_time", message.getSentTime());
 
-                    if(message.getData() != null){
+                    if (message.getData() != null) {
                         Map<String, String> data = message.getData();
                         Set<String> keysIterator = data.keySet();
-                        for(String key: keysIterator){
+                        for (String key : keysIterator) {
                             params.putString(key, data.get(key));
                         }
                     }
@@ -356,13 +358,13 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
         }, intentFilter);
     }
 
-    private WritableMap parseIntent(Intent intent){
+    private WritableMap parseIntent(Intent intent) {
         WritableMap params;
         Bundle extras = intent.getExtras();
         if (extras != null) {
             try {
                 params = Arguments.fromBundle(extras);
-            } catch (Exception e){
+            } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
                 params = Arguments.createMap();
             }
@@ -397,7 +399,7 @@ public class FIRMessagingModule extends ReactContextBaseJavaModule implements Li
     }
 
     @Override
-    public void onNewIntent(Intent intent){
+    public void onNewIntent(Intent intent) {
         sendEvent("FCMNotificationReceived", parseIntent(intent));
     }
 }
